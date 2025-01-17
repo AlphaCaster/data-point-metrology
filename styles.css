@@ -1,0 +1,114 @@
+/* General Styling */
+body {
+    font-family: 'Arial', sans-serif;
+    line-height: 1.6;
+    margin: 0;
+    padding: 0;
+    color: #333;
+  }
+  
+  /* Hero Section */
+  .hero {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    color: white;
+    min-height: 70vh;
+    padding: 40px 20px;
+    position: relative;
+    background-color: #330033;
+  }
+  
+  .hero h1 {
+    font-size: 2.5rem;
+    font-weight: bold;
+  }
+  
+  .hero p {
+    font-size: 1.2rem;
+    margin-top: 20px;
+  }
+  
+  /* Animated Hexagonal Background */
+  .hexagonal-background {
+    background-image: url('endless-constellation.svg'); /* Ensure this file is in the same folder */
+    background-size: contain;
+    background-repeat: repeat;
+    animation: animate-hexagons 20s linear infinite;
+  }
+  
+  /* Accent Button */
+  .btn-accent {
+    background-color: #505;
+    color: white;
+    border: none;
+  }
+  
+  .btn-accent:hover {
+    background-color: #330033;
+    color: #f7f7f7;
+  }
+  
+  /* Benefits Section */
+  .benefits {
+    background-color: #f7f7f7;
+  }
+  
+  .benefit-card {
+    background: white;
+    border-radius: 10px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+  }
+  
+  .benefit-card:hover {
+    transform: translateY(-10px);
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+  }
+  
+  .benefit-card h4 {
+    color: #330033;
+  }
+  
+  .benefit-card p {
+    color: #505;
+  }
+  
+  /* Form Section */
+  .form-section {
+    background-color: #e3f2fd;
+  }
+  
+/* Form Section */
+.form-section {
+    background-color: #f7f7f7; /* Light neutral background */
+    padding: 60px 20px;
+  }
+  
+  .form-container {
+    max-width: 600px;
+    margin: 0 auto;
+    border-radius: 10px;
+    overflow: hidden;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  }
+  
+  iframe {
+    border: none;
+    border-radius: 10px;
+    background-color: #330033; /* Match the site's primary color */
+  }
+  
+  
+  
+  /* Keyframes for Hexagonal Animation */
+  @keyframes animate-hexagons {
+    from {
+      background-position: 0 0;
+    }
+    to {
+      background-position: 60px 60px;
+    }
+  }
+  
