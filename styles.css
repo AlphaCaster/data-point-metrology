@@ -7,6 +7,39 @@ body {
     color: #333;
   }
   
+  /* Navbar Styling */
+  .navbar-custom {
+    background-color: #330033; /* Match the primary color */
+    border-bottom: 2px solid #505; /* Subtle accent */
+  }
+  
+  .navbar-custom .navbar-brand {
+    font-weight: bold;
+    color: #f7f7f7; /* White for contrast */
+  }
+  
+  .navbar-custom .navbar-brand:hover {
+    color: #d1d1d1; /* Light gray on hover */
+  }
+  
+  .navbar-custom .nav-link {
+    color: #f7f7f7; /* White for contrast */
+    margin-right: 15px;
+    transition: color 0.3s ease;
+  }
+  
+  .navbar-custom .nav-link:hover {
+    color: #d1d1d1; /* Subtle hover effect */
+  }
+  
+  .navbar-custom .navbar-toggler {
+    border-color: #505;
+  }
+  
+  .navbar-custom .navbar-toggler-icon {
+    background-color: #f7f7f7; /* White icon for the toggle */
+  }
+  
   /* Hero Section */
   .hero {
     display: flex;
@@ -17,7 +50,6 @@ body {
     min-height: 70vh;
     padding: 40px 20px;
     position: relative;
-    background-color: #330033;
   }
   
   .hero h1 {
@@ -43,11 +75,16 @@ body {
     background-color: #505;
     color: white;
     border: none;
+    padding: 10px 20px;
+    font-size: 1rem;
+    font-weight: bold;
+    transition: background-color 0.3s ease, transform 0.2s ease;
   }
   
   .btn-accent:hover {
     background-color: #330033;
     color: #f7f7f7;
+    transform: translateY(-2px);
   }
   
   /* Benefits Section */
@@ -77,11 +114,6 @@ body {
   
   /* Form Section */
   .form-section {
-    background-color: #e3f2fd;
-  }
-  
-/* Form Section */
-.form-section {
     background-color: #f7f7f7; /* Light neutral background */
     padding: 60px 20px;
   }
@@ -99,8 +131,6 @@ body {
     border-radius: 10px;
     background-color: #330033; /* Match the site's primary color */
   }
-  
-  
   
   /* Keyframes for Hexagonal Animation */
   @keyframes animate-hexagons {
