@@ -1,100 +1,684 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Data Point Metrology</title>
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
-  <link rel="stylesheet" href="styles.css">
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Futuristic Object Generator — Center, Grow, Launch</title>
+    <style>
+        :root {
+            --bg1: #060913;
+            --bg2: #0b1224;
+            --text: #e6f1ff;
+            --muted: #8aa3c7;
+            --accent: #5bf1ff;
+            --accent2: #79ffa8;
+            --ring: #00f0ff;
+        }
+
+        * {
+            box-sizing: border-box
+        }
+
+        html, body {
+            height: 100%;
+            margin: 0;
+            color: var(--text);
+            font-family: ui-sans-serif,system-ui,Segoe UI,Roboto,Arial
+        }
+
+        body {
+            background: radial-gradient(1200px 800px at 20% -10%, #081022 0%, var(--bg1) 65%), radial-gradient(1000px 600px at 120% 120%, #071126 0%, var(--bg2) 60%);
+            overflow: hidden;
+        }
+
+        .grid-bg::before, .grid-bg::after {
+            content: "";
+            position: fixed;
+            inset: 0;
+            pointer-events: none
+        }
+
+        .grid-bg::before {
+            background: repeating-linear-gradient(transparent 0 28px, rgba(91,241,255,.06) 28px 29px), repeating-linear-gradient(90deg, transparent 0 28px, rgba(91,241,255,.06) 28px 29px);
+            mix-blend-mode: screen;
+            opacity: .35;
+            animation: gridMove 18s linear infinite;
+        }
+
+        .grid-bg::after {
+            background: linear-gradient(180deg,transparent 0%,rgba(0,0,0,.35) 100%)
+        }
+
+        @keyframes gridMove {
+            0% {
+                background-position: 0 0,0 0
+            }
+
+            100% {
+                background-position: 0 300px,300px 0
+            }
+        }
+
+        .site-header, .site-footer {
+            max-width: 1100px;
+            margin: 0 auto;
+            padding: 16px 20px 0;
+            position: relative;
+            z-index: 3
+        }
+
+        .site-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px
+        }
+
+        h1 {
+            font-size: clamp(1.1rem,1rem + 1.2vw,1.8rem);
+            margin: 0;
+            letter-spacing: .5px;
+            text-shadow: 0 0 20px rgba(0,240,255,.35)
+        }
+
+        .controls {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap
+        }
+
+        .btn {
+            background: linear-gradient(180deg,var(--accent),var(--accent2));
+            color: #06222a;
+            border: 0;
+            border-radius: 12px;
+            padding: 10px 14px;
+            font-weight: 800;
+            cursor: pointer
+        }
+
+            .btn:focus-visible {
+                outline: 3px solid var(--ring);
+                outline-offset: 2px
+            }
+
+        .hint {
+            max-width: 1100px;
+            margin: 6px auto 12px;
+            padding: 0 20px;
+            color: var(--muted);
+            font-size: .95rem;
+            position: relative;
+            z-index: 3
+        }
+
+        main {
+            position: relative;
+            height: calc(100vh - 150px);
+            max-height: 100%;
+            z-index: 2
+        }
+
+        .stage {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            overflow: hidden
+        }
+
+        .exit-rail {
+            position: fixed;
+            top: 0;
+            right: 0;
+            width: clamp(8px,.9vw,12px);
+            height: 100vh;
+            background: linear-gradient(180deg, rgba(91,241,255,.7), rgba(121,255,168,.3));
+            box-shadow: -4px 0 16px rgba(0,0,0,.25);
+            opacity: .35;
+            pointer-events: none;
+            z-index: 1
+        }
+
+        /* Animatable custom properties so we can combine shake + scale cleanly */
+        @property --s {
+            syntax: "<number>";
+            initial-value: 1;
+            inherits: false;
+        }
+
+        @property --jX {
+            syntax: "<length>";
+            initial-value: 0px;
+            inherits: false;
+        }
+
+        @property --jY {
+            syntax: "<length>";
+            initial-value: 0px;
+            inherits: false;
+        }
+
+        /* Wrapper that moves to center and launches right */
+        .fxwrap {
+            position: fixed;
+            left: 0;
+            top: 0;
+            width: 0;
+            height: 0;
+            z-index: 5;
+            transform: translate(0,0);
+            will-change: transform;
+        }
+
+        @keyframes moveToCenter {
+            from {
+                transform: translate(0,0)
+            }
+
+            to {
+                transform: translate(var(--tx), var(--ty))
+            }
+        }
+
+        .fxwrap.to-center {
+            animation: moveToCenter 700ms cubic-bezier(.2,.7,.25,1) forwards
+        }
+
+        /* Hologram chip (inside the wrapper) */
+        .chip {
+            position: relative;
+            background: linear-gradient(180deg, rgba(20,40,72,.85), rgba(10,20,40,.65));
+            border: 1px solid rgba(91,241,255,.18);
+            border-radius: 16px;
+            padding: 10px 12px;
+            display: inline-grid;
+            grid-auto-flow: column;
+            gap: 10px;
+            align-items: center;
+            box-shadow: 0 8px 22px rgba(0,0,0,.35), 0 0 22px rgba(0,240,255,.10) inset;
+            backdrop-filter: blur(4px) saturate(130%);
+            cursor: pointer;
+            user-select: none;
+            touch-action: manipulation;
+            white-space: nowrap;
+            /* Compose transforms via custom properties */
+            transform: translate(var(--jX), var(--jY)) scale(var(--s));
+            transition: box-shadow .15s ease, border-color .15s ease;
+            animation: idleGlow 1400ms ease-in-out infinite alternate, idleJitter 1800ms ease-in-out infinite alternate;
+        }
+
+        .emoji {
+            font-size: 30px;
+            line-height: 1;
+            filter: drop-shadow(0 0 6px rgba(91,241,255,.45))
+        }
+
+        .title {
+            font-weight: 800;
+            letter-spacing: .3px;
+            text-shadow: 0 0 10px rgba(0,240,255,.25)
+        }
+
+        @keyframes idleJitter {
+            0% {
+                transform: translate(-0.6px,-0.4px) scale(1)
+            }
+
+            50% {
+                transform: translate(0.4px,0.6px) scale(1)
+            }
+
+            100% {
+                transform: translate(0.2px,-0.5px) scale(1)
+            }
+        }
+
+        @keyframes idleGlow {
+            0% {
+                box-shadow: 0 8px 22px rgba(0,0,0,.35), 0 0 10px rgba(0,240,255,.10) inset
+            }
+
+            100% {
+                box-shadow: 0 8px 22px rgba(0,0,0,.35), 0 0 20px rgba(0,240,255,.22) inset
+            }
+        }
+
+        /* Long charge: scale to half-screen size + shake via jX/jY */
+        .chip.arm {
+            animation: scaleUp 3.8s ease-in-out 1 forwards, vibrate 120ms linear infinite, idleGlow 1400ms ease-in-out infinite alternate;
+        }
+
+        @keyframes scaleUp {
+            0% {
+                --s: 1
+            }
+
+            40% {
+                --s: calc(1 + (var(--chargeScale) - 1) * 0.40)
+            }
+
+            75% {
+                --s: calc(1 + (var(--chargeScale) - 1) * 0.75)
+            }
+
+            100% {
+                --s: var(--chargeScale)
+            }
+        }
+
+        @keyframes vibrate {
+            0% {
+                --jX: 0px;
+                --jY: 0px
+            }
+
+            25% {
+                --jX: -1.2px;
+                --jY: 0.6px
+            }
+
+            50% {
+                --jX: 1.0px;
+                --jY: -0.8px
+            }
+
+            75% {
+                --jX: 0.6px;
+                --jY: 1.1px
+            }
+
+            100% {
+                --jX: -0.8px;
+                --jY: 0.2px
+            }
+        }
+
+        /* Launch: wrapper streaks right; chip keeps its grown scale */
+        @keyframes launchRight {
+            0% {
+                transform: translate(var(--tx), var(--ty))
+            }
+
+            60% {
+                transform: translate(calc(var(--tx) + 70vw), var(--ty))
+            }
+
+            85% {
+                transform: translate(calc(var(--tx) + 95vw), var(--ty))
+            }
+
+            100% {
+                transform: translate(calc(var(--tx) + 120vw), var(--ty))
+            }
+        }
+
+        .fxwrap.fly-out {
+            animation: launchRight 1.2s cubic-bezier(.18,.7,.25,1) forwards
+        }
+
+        /* Motion blur & fade on the chip during launch */
+        .chip.blur-out {
+            animation: blurFade 1.2s cubic-bezier(.18,.7,.25,1) forwards;
+        }
+
+        @keyframes blurFade {
+            0% {
+                filter: blur(0px) brightness(1.18);
+                opacity: 1
+            }
+
+            60% {
+                filter: blur(1.6px) brightness(1.22);
+                opacity: .95
+            }
+
+            85% {
+                filter: blur(2.2px) brightness(1.25);
+                opacity: .7
+            }
+
+            100% {
+                filter: blur(2.6px) brightness(1.28);
+                opacity: 0
+            }
+        }
+
+        /* Particles */
+        .particle {
+            position: fixed;
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            pointer-events: none;
+            z-index: 4;
+            background: radial-gradient(circle at 30% 30%, #fff 0%, var(--accent) 45%, rgba(121,255,168,.9) 100%);
+            box-shadow: 0 0 12px rgba(91,241,255,.8), 0 0 30px rgba(121,255,168,.35);
+            opacity: .95;
+            animation: spark 700ms ease-out forwards;
+        }
+
+        @keyframes spark {
+            0% {
+                transform: translate(0,0) scale(1);
+                opacity: 1
+            }
+
+            100% {
+                transform: translate(var(--dx), var(--dy)) scale(.5);
+                opacity: 0
+            }
+        }
+
+        .scanlines {
+            position: fixed;
+            inset: 0;
+            pointer-events: none;
+            z-index: 0;
+            background: repeating-linear-gradient(transparent 0 2px, rgba(255,255,255,.02) 2px 3px);
+            animation: flicker 4s infinite linear;
+        }
+
+        @keyframes flicker {
+            0%,100% {
+                opacity: .16
+            }
+
+            50% {
+                opacity: .12
+            }
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            .chip, .chip:hover, .chip:active {
+                transition: none;
+                animation: none !important;
+                transform: none !important
+            }
+
+            .fxwrap {
+                animation: none !important;
+                transform: none !important
+            }
+
+            .particle {
+                animation: none
+            }
+        }
+
+        .site-footer {
+            text-align: center;
+            color: var(--muted);
+            padding-bottom: 16px;
+            position: relative;
+            z-index: 3
+        }
+    </style>
 </head>
 <body>
-  <!-- Navigation Bar -->
-  <nav class="navbar navbar-expand-lg navbar-dark navbar-custom">
-    <div class="container">
-      <a class="navbar-brand" href="#">Data Point Metrology</a>
-      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
-        <span class="navbar-toggler-icon"></span>
-      </button>
-      <div class="collapse navbar-collapse" id="navbarNav">
-        <ul class="navbar-nav ms-auto">
-          <li class="nav-item">
-            <a class="nav-link" href="#form">Request a Demo</a>
-          </li>
-          <li class="nav-item">
-            <a class="nav-link" href="#benefits">Why Choose Us</a>
-          </li>
-          <li class="nav-item">
-            <a class="nav-link" href="#about">About</a>
-          </li>
-        </ul>
-      </div>
-    </div>
-  </nav>
+    <div class="grid-bg"></div>
+    <div class="scanlines"></div>
 
-  <!-- Hero Section -->
-  <section class="hero hexagonal-background">
-    <div class="container">
-      <div class="text-center text-content">
-        <h1>Experience Precision with Data Point Metrology</h1>
-        <p>Empowering industrial companies and small businesses with expert Hexagon CMM programming.</p>
-        <a href="#form" class="btn btn-accent btn-lg mt-3">Request a Demo</a>
-      </div>
-    </div>
-  </section>
-
-  <!-- Benefits Section -->
-  <section id="benefits" class="benefits py-5">
-    <div class="container">
-      <h2 class="text-center mb-4">Why Choose Us?</h2>
-      <div class="row g-4">
-        <!-- Precision Programming -->
-        <div class="col-md-4">
-          <div class="benefit-card p-4 text-center">
-            <img src="ComputerDesktop.svg" alt="Precision Icon" width="80">
-            <h4 class="mt-3">Precision Programming</h4>
-            <p>Tailored solutions to maximize your CMM performance.</p>
-          </div>
+    <header class="site-header">
+        <h1>Praise Temple KidZ Quest Object Generator</h1>
+        <div class="controls">
+            <button id="resetBtn" class="btn">Reset</button>
+            <button id="shuffleBtn" class="btn">Shuffle</button>
         </div>
-        <!-- Quick Turnaround -->
-        <div class="col-md-4">
-          <div class="benefit-card p-4 text-center">
-            <img src="Forward.svg" alt="Speed Icon" width="80">
-            <h4 class="mt-3">Quick Turnaround</h4>
-            <p>Efficient and timely service to meet your deadlines.</p>
-          </div>
-        </div>
-        <!-- Support -->
-        <div class="col-md-4">
-          <div class="benefit-card p-4 text-center">
-            <img src="InformationCircle.svg" alt="Support Icon" width="80">
-            <h4 class="mt-3">24/7 Support</h4>
-            <p>Dedicated support for your programming needs.</p>
-          </div>
-        </div>
-      </div>
-    </div>
-  </section>
+    </header>
 
-  <!-- Form Section -->
-  <section id="form" class="form-section py-5">
-    <div class="container">
-      <h2 class="text-center mb-4" style="color: #f7f7f7;">Request a Demo</h2>
-      <div class="form-container">
-        <iframe
-          src="https://form.jotform.com/250158101628147"
-          width="100%"
-          height="800"
-          frameborder="0"
-          marginheight="0"
-          marginwidth="0"
-          style="background-color: #330033; border-radius: 10px; border: none;"
-        >
-          Loading…
-        </iframe>
-      </div>
-    </div>
-  </section>
+    <p class="hint">Click an item — then use a little bit of Faith and see what it can produce!</p>
 
-  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <main>
+        <div id="stage" class="stage" aria-live="polite"></div>
+        <div class="exit-rail" aria-hidden="true"></div>
+    </main>
+
+    <footer class="site-footer">
+        <small>Use a little bit of Faith and watch what the Lord will do!</small>
+    </footer>
+
+    <script>
+        /*** CONFIG ***/
+        const OBJECTS = [
+            { title: "Faith", side: "Spirit", emoji: "🕊️" },
+            { title: "Prayer", side: "Spirit", emoji: "🙏" },
+            { title: "Scripture", side: "Spirit", emoji: "📖" },
+            { title: "Forgiveness", side: "Spirit", emoji: "🤝" },
+            { title: "Worship", side: "Spirit", emoji: "🎶" },
+            { title: "Patience", side: "Spirit", emoji: "⏳" },
+            { title: "Gratitude", side: "Spirit", emoji: "🌿" },
+            { title: "Hope", side: "Spirit", emoji: "🌅" },
+            { title: "Purity", side: "Spirit", emoji: "💧" },
+            { title: "Obedience", side: "Spirit", emoji: "🛡️" },
+            { title: "Fear", side: "Flesh", emoji: "😨" },
+            { title: "Gossip", side: "Flesh", emoji: "🗣️" },
+            { title: "Distraction", side: "Flesh", emoji: "📱" },
+            { title: "Grudge", side: "Flesh", emoji: "🪨" },
+            { title: "Idolatry", side: "Flesh", emoji: "🗿" },
+            { title: "Impulse", side: "Flesh", emoji: "⚡" },
+            { title: "Complaining", side: "Flesh", emoji: "🙄" },
+            { title: "Doubt", side: "Flesh", emoji: "❓" },
+            { title: "Temptation", side: "Flesh", emoji: "🍎" },
+            { title: "Rebellion", side: "Flesh", emoji: "🔥" }
+        ];
+
+        /*** TIMING ***/
+        const CHARGE_MS = 3800;  // grow & shake (≈3.8s)
+        const CENTER_MS = 700;   // slide to center
+        const LAUNCH_MS = 1200;  // streak right
+
+        /*** LAYOUT (no overlap) ***/
+        const EDGE_PAD = 16;
+        const HITBOX_PAD = 10;
+        const MAX_TRIES_PER_ITEM = 700;
+
+        const stage = document.getElementById("stage");
+        const resetBtn = document.getElementById("resetBtn");
+        const shuffleBtn = document.getElementById("shuffleBtn");
+
+        function shuffle(arr) { const a = arr.slice(); for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1));[a[i], a[j]] = [a[j], a[i]] } return a; }
+        function overlaps(a, b, pad = 0) { return !(a.right + pad <= b.left || a.left >= b.right + pad || a.bottom + pad <= b.top || a.top >= b.bottom + pad); }
+        function clamp(v, min, max) { return Math.max(min, Math.min(max, v)); }
+
+        /* Make absolute chips in the stage (non-overlap) */
+        function makeStageChip(obj) {
+            const chip = document.createElement("button");
+            chip.className = "chip"; chip.type = "button"; chip.setAttribute("aria-label", obj.title);
+            chip.innerHTML = `<span class="emoji" aria-hidden="true">${obj.emoji || "🔹"}</span><span class="title">${escapeHTML(obj.title)}</span>`;
+            chip.style.position = "absolute";
+            chip.addEventListener("click", () => centerChargeLaunch(chip));
+            chip.addEventListener("keyup", e => { if (e.key === "Enter" || e.key === " ") chip.click(); });
+            return chip;
+        }
+
+        function renderNoOverlap(items) {
+            stage.innerHTML = "";
+            const bounds = stage.getBoundingClientRect();
+            const availW = Math.max(0, bounds.width - EDGE_PAD * 2);
+            const availH = Math.max(0, bounds.height - EDGE_PAD * 2);
+
+            const chips = items.map(makeStageChip);
+            chips.forEach(c => { c.style.visibility = "hidden"; stage.appendChild(c); });
+
+            const placed = [];
+            chips.forEach(chip => {
+                let w = chip.offsetWidth, h = chip.offsetHeight;
+                if (w > availW) { chip.style.transformOrigin = "left top"; chip.style.scale = "0.9"; w = chip.offsetWidth; h = chip.offsetHeight; }
+
+                let attempt = 0, ok = false, left = 0, top = 0;
+                while (attempt < MAX_TRIES_PER_ITEM && !ok) {
+                    left = EDGE_PAD + Math.floor(Math.random() * Math.max(1, availW - w));
+                    top = EDGE_PAD + Math.floor(Math.random() * Math.max(1, availH - h));
+                    const rect = { left, top, right: left + w, bottom: top + h };
+                    ok = placed.every(p => !overlaps(rect, p, HITBOX_PAD));
+                    attempt++;
+                }
+
+                if (!ok) {
+                    const step = 8;
+                    outer: for (let y = EDGE_PAD; y <= availH; y += step) {
+                        for (let x = EDGE_PAD; x <= availW; x += step) {
+                            const rect = { left: x, top: y, right: x + w, bottom: y + h };
+                            if (rect.right > bounds.width - EDGE_PAD || rect.bottom > bounds.height - EDGE_PAD) continue;
+                            if (placed.every(p => !overlaps(rect, p, HITBOX_PAD))) { left = x; top = y; ok = true; break outer; }
+                        }
+                    }
+                }
+
+                left = clamp(left, EDGE_PAD, bounds.width - w - EDGE_PAD);
+                top = clamp(top, EDGE_PAD, bounds.height - h - EDGE_PAD);
+
+                chip.style.left = left + "px";
+                chip.style.top = top + "px";
+                chip.style.visibility = "visible";
+                placed.push({ left, top, right: left + w, bottom: top + h });
+            });
+        }
+
+        function reshufflePositions() {
+            const items = Array.from(stage.querySelectorAll(".chip")).map(ch => ({
+                title: ch.querySelector(".title").textContent,
+                emoji: ch.querySelector(".emoji")?.textContent || "🔹"
+            }));
+            renderNoOverlap(shuffle(items));
+        }
+
+        /*** CLICK SEQUENCE: move to center → charge (grow+shake) → launch right ***/
+        function centerChargeLaunch(stageChip) {
+            // measure the stage chip
+            const r = stageChip.getBoundingClientRect();
+            const cx = r.left + r.width / 2;
+            const cy = r.top + r.height / 2;
+
+            // compute wrapper translation needed to bring center to viewport center
+            const targetCX = window.innerWidth / 2;
+            const targetCY = window.innerHeight / 2;
+            const tx = targetCX - cx;
+            const ty = targetCY - cy;
+
+            // compute scale so the chip becomes ~half of the screen
+            // Fit to 50% of viewport height and 60% of viewport width (whichever smaller)
+            const scaleH = (0.5 * window.innerHeight) / r.height;
+            const scaleW = (0.6 * window.innerWidth) / r.width;
+            const chargeScale = Math.max(1.0, Math.min(scaleH, scaleW)); // never smaller than 1
+
+            // build wrapper and clone for animation
+            const wrap = document.createElement("div");
+            wrap.className = "fxwrap";
+            wrap.style.left = r.left + "px";
+            wrap.style.top = r.top + "px";
+            wrap.style.width = r.width + "px";
+            wrap.style.height = r.height + "px";
+            wrap.style.setProperty("--tx", tx + "px");
+            wrap.style.setProperty("--ty", ty + "px");
+
+            const clone = stageChip.cloneNode(true);
+            clone.style.position = "relative";
+            clone.style.left = "0"; clone.style.top = "0";
+            // pass scale target to clone
+            clone.style.setProperty("--s", 1);
+            clone.style.setProperty("--jX", "0px");
+            clone.style.setProperty("--jY", "0px");
+            clone.style.setProperty("--chargeScale", chargeScale);
+
+            wrap.appendChild(clone);
+            document.body.appendChild(wrap);
+
+            // remove original immediately (free space for clicks)
+            stageChip.remove();
+
+            // phase 1: move wrapper to center
+            wrap.classList.add("to-center");
+
+            // after center move done, start charge on inner chip
+            setTimeout(() => {
+                clone.classList.add("arm");
+                // after charge done, launch wrapper and blur/fade chip + sparks + sfx
+                setTimeout(() => {
+                    wrap.classList.remove("to-center");
+                    wrap.classList.add("fly-out");
+                    clone.classList.remove("arm");
+                    clone.classList.add("blur-out");
+
+                    // trail during launch
+                    const startX = targetCX;
+                    const startY = targetCY;
+                    trail(startX, startY, LAUNCH_MS);
+
+                    playSFX();
+
+                    // cleanup wrapper after launch
+                    const prefersReduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+                    setTimeout(() => wrap.remove(), (prefersReduced ? 0 : LAUNCH_MS) + 60);
+                }, CHARGE_MS);
+            }, CENTER_MS);
+        }
+
+        /*** Trail particles for the duration of the launch ***/
+        function trail(startX, startY, duration) {
+            const start = performance.now();
+            const targetDeltaX = window.innerWidth * 1.1;
+            function emitAt(x, y) {
+                const p = document.createElement("div");
+                p.className = "particle";
+                const ang = (Math.random() * Math.PI / 2) - (Math.PI / 4);
+                const speed = 60 + Math.random() * 180;
+                const dx = Math.cos(ang) * speed;
+                const dy = Math.sin(ang) * speed;
+                p.style.left = (x - 3) + "px";
+                p.style.top = (y - 3) + "px";
+                p.style.setProperty("--dx", dx + "px");
+                p.style.setProperty("--dy", dy + "px");
+                document.body.appendChild(p);
+                setTimeout(() => p.remove(), 700);
+            }
+            function step(now) {
+                const t = now - start;
+                const ratio = Math.min(1, t / duration);
+                const x = startX + ratio * targetDeltaX;
+                const y = startY + (Math.random() * 6 - 3);
+                emitAt(x, y);
+                if (t < duration) requestAnimationFrame(step);
+            }
+            requestAnimationFrame(step);
+        }
+
+        /*** WebAudio SFX ***/
+        let audioCtx = null;
+        function playSFX() {
+            try {
+                if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+                const o = audioCtx.createOscillator();
+                const g = audioCtx.createGain();
+                const f = audioCtx.createBiquadFilter();
+                o.type = "triangle";
+                o.frequency.setValueAtTime(320, audioCtx.currentTime);
+                o.frequency.exponentialRampToValueAtTime(760, audioCtx.currentTime + 0.22);
+                f.type = "lowpass"; f.frequency.value = 1600;
+                g.gain.setValueAtTime(0.0001, audioCtx.currentTime);
+                g.gain.exponentialRampToValueAtTime(0.18, audioCtx.currentTime + 0.08);
+                g.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + 0.35);
+                o.connect(f); f.connect(g); g.connect(audioCtx.destination);
+                o.start(); o.stop(audioCtx.currentTime + 0.38);
+            } catch (e) { }
+        }
+
+        /*** CONTROLS, UTILS, INIT ***/
+        function resetAll() { renderNoOverlap(shuffle(OBJECTS)); }
+        function escapeHTML(str) { return String(str).replace(/[&<>"']/g, m => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#039;" }[m])); }
+
+        resetBtn.addEventListener("click", resetAll);
+        shuffleBtn.addEventListener("click", () => {
+            const items = Array.from(stage.querySelectorAll(".chip")).map(ch => ({
+                title: ch.querySelector(".title").textContent,
+                emoji: ch.querySelector(".emoji")?.textContent || "🔹"
+            }));
+            renderNoOverlap(shuffle(items));
+        });
+
+        window.addEventListener("load", resetAll);
+        let resizeTO = null;
+        window.addEventListener("resize", () => { clearTimeout(resizeTO); resizeTO = setTimeout(() => shuffleBtn.click(), 150); });
+    </script>
 </body>
 </html>
